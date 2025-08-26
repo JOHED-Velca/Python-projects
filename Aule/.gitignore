@@ -1,0 +1,27 @@
+# Ignore .env files
+.env
+.env.local
+.env.*.local
+
+# Also ignore environment variables file (common alternative)
+.envrc
+
+# Ignore build/output directories
+/target/
+**/target/
+
+# Ignore Cargo.lock for libraries (optional, but often included)
+# Cargo.lock
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore debug files
+*.log
