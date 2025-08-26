@@ -1,0 +1,10 @@
+fastapi==0.111.0
+uvicorn==0.29.0
+pydantic==2.8.2
+SQLAlchemy==2.0.32
+psycopg2-binary==2.9.9
+python-dotenv==1.0.1
+Jinja2==3.1.4
+httpx==0.27.0
+# Optional PDF (install later if you want real PDFs)
+# WeasyPrint==61.2
