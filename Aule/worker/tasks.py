@@ -9,18 +9,18 @@ from db.sessions import engine
 
 
 if __name__ == "__main__":
-try:
-with engine.connect() as conn:
-conn.exec_driver_sql("SELECT 1")
-print("[worker] DB connectivity OK")
-except Exception as e:
-print(f"[worker] DB connectivity FAILED: {e}")
-sys.exit(1)
+    try:
+        with engine.connect() as conn:
+            conn.exec_driver_sql("SELECT 1")
+        print("[worker] DB connectivity OK")
+    except Exception as e:
+        print(f"[worker] DB connectivity FAILED: {e}")
+        sys.exit(1)
 
 
-print("[worker] Idle loop. (Queue coming next step)")
-try:
-while True:
-time.sleep(5)
-except KeyboardInterrupt:
-print("[worker] Stopped")
+    print("[worker] Idle loop. (Queue coming next step)")
+    try:
+        while True:
+            time.sleep(5)
+    except KeyboardInterrupt:
+        print("[worker] Stopped")

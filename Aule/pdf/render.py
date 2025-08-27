@@ -15,8 +15,8 @@ DEFAULT_TEMPLATE = "cover_letter.html"
 
 
 def render_cover_letter(context: dict, template_name: str = DEFAULT_TEMPLATE) -> str:
-template = _env.get_template(template_name)
-return template.render(**context)
+    template = _env.get_template(template_name)
+    return template.render(**context)
 
 
 # For PDFs: consider WeasyPrint later

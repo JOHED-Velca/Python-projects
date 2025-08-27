@@ -1,27 +1,33 @@
-# Ignore .env files
-.env
-.env.local
-.env.*.local
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+*.coverage
+.coverage*
+.pytest_cache/
+.mypy_cache/
+.pytype/
+.venv/
+env/
+venv/
 
-# Also ignore environment variables file (common alternative)
+# Env / local config
+.env
+*.env.local
 .envrc
 
-# Ignore build/output directories
-/target/
-**/target/
-
-# Ignore Cargo.lock for libraries (optional, but often included)
-# Cargo.lock
-
-# Ignore IDE-specific files
+# Editors/OS
 .vscode/
 .idea/
-*.swp
-*.swo
-
-# Ignore OS-specific files
 .DS_Store
 Thumbs.db
 
-# Ignore debug files
+# Builds / dist
+build/
+dist/
+*.egg-info/
+
+# Docker
 *.log

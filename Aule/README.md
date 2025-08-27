@@ -1,3 +1,6 @@
+# Aule: Automated Job Application Bot
+
+Aule is a Python-based bot designed to automate the process of applying to jobs. It streamlines job applications by handling tasks such as parsing job listings, filling out application forms, and managing application workflows, making the job search process more efficient and less time-consuming.
 # Aule (Job Application Bot) — Step 1
 
 

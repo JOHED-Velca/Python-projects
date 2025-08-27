@@ -1,34 +1,30 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8" />
-<title>Cover Letter</title>
-<style>
-body { font-family: Arial, Helvetica, sans-serif; line-height: 1.4; }
-</style>
-</head>
-<body>
-<p>Dear Hiring Manager,</p>
+  <head>
+    <meta charset="utf-8" />
+    <title>Cover Letter</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Dear Hiring Manager,</p>
 
+    <p>{{ intro or "I’m excited to apply for the role." }}</p>
 
-<p>{{ intro or "I’m excited to apply for the role." }}</p>
+    <p>
+      I’m applying for the <strong>{{ job_title }}</strong> position at
+      <strong>{{ company }}</strong>{% if location %} in {{ location }}{% endif
+      %}. {{ summary }}
+    </p>
 
+    <p>Key requirements I match: {{ requirements|join(', ') }}.</p>
 
-<p>
-I’m applying for the <strong>{{ job_title }}</strong> position at
-<strong>{{ company }}</strong>{% if location %} in {{ location }}{% endif %}.
-{{ summary }}
-</p>
+    <p>{{ closing or "Thank you for your time and consideration." }}</p>
 
-
-<p>
-Key requirements I match: {{ requirements|join(', ') }}.
-</p>
-
-
-<p>{{ closing or "Thank you for your time and consideration." }}</p>
-
-
-<p>Sincerely,<br/>Your Name</p>
-</body>
+    <p>Sincerely,<br />Your Name</p>
+  </body>
 </html>

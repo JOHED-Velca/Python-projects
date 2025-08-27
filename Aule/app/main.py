@@ -8,11 +8,11 @@ app = FastAPI(title="Aule Job Bot", version="0.1.0")
 
 
 app.add_middleware(
-CORSMiddleware,
-allow_origins=["*"],
-allow_credentials=True,
-allow_methods=["*"],
-allow_headers=["*"],
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -22,4 +22,4 @@ app.include_router(tailor_router.router, prefix="/tailor", tags=["tailor"])
 
 @app.get("/")
 def health():
-return {"ok": True, "service": "Aule", "version": "0.1.0"}
+    return {"ok": True, "service": "Aule", "version": "0.1.0"}
