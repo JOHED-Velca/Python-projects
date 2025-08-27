@@ -7,7 +7,8 @@ Base = declarative_base()
 
 
 class Job(Base):
-    tablename__ = "jobs"
+    __tablename__ = "jobs"
+    
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
     company = Column(String(200), nullable=False)
