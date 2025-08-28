@@ -26,7 +26,7 @@ services:
       - redis
     ports:
       - "8000:8000"
-    user: "${UID}:${GID}"
+    user: "${USER_ID}:${GROUP_ID}"
 
   worker:
     build: .
@@ -37,7 +37,7 @@ services:
     depends_on:
       - redis
       - db
-    user: "${UID}:${GID}"
+    user: "${USER_ID}:${GROUP_ID}"
 
 volumes:
   db_data:

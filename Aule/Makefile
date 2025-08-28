@@ -1,12 +1,12 @@
 SHELL := /bin/bash
 
-# Compute your user/group IDs dynamically so files created by containers are owned by you
-UID := $(shell id -u)
-GID := $(shell id -g)
+# Use names that won't collide with bash's readonly UID variable
+USER_ID := $(shell id -u)
+GROUP_ID := $(shell id -g)
 
-DOCKER_COMPOSE := UID=$(UID) GID=$(GID) docker compose
+DOCKER_COMPOSE := sudo USER_ID=$(USER_ID) GROUP_ID=$(GROUP_ID) docker compose
 
-.PHONY: up upd down stop restart ps logs logs-api logs-worker api-sh worker-sh db-sh fix-perms open-cover-letter build
+.PHONY: up upd down stop restart ps logs logs-api logs-worker api-sh worker-sh db-sh fix-perms open-cover-letter build render-letter
 
 ## Build images (if you change Dockerfile/requirements.txt)
 build:
@@ -66,6 +66,18 @@ fix-perms:
 	chmod -R a+r out || true
 	chmod a+rx out || true
 
-## Open the rendered cover letter (Linux or macOS)
+## Render a sample cover letter HTML inside the API container
+render-letter:
+	$(DOCKER_COMPOSE) exec api python scripts/render_letter.py
+	@$(MAKE) fix-perms
+
+## Open the rendered cover letter using Python (works without sudo)
 open-cover-letter:
-	xdg-open out/cover_letter.html 2>/dev/null || open out/cover_letter.html
+	python - <<'PY'
+	import webbrowser, pathlib, sys
+	p = pathlib.Path("out/cover_letter.html").resolve()
+	if not p.exists():
+		sys.exit("out/cover_letter.html not found. Run `make render-letter` first.")
+	webbrowser.open(p.as_uri())
+	print("Opened", p)
+	PY
