@@ -68,16 +68,15 @@ fix-perms:
 
 ## Render a sample cover letter HTML inside the API container
 render-letter:
-	$(DOCKER_COMPOSE) exec api python scripts/render_letter.py
+	$(DOCKER_COMPOSE) exec -e PYTHONPATH=/app api python scripts/render_letter.py
 	@$(MAKE) fix-perms
 
-## Open the rendered cover letter using Python (works without sudo)
+## Open the rendered cover letter (tries xdg-open/open, then falls back to python3)
 open-cover-letter:
-	python - <<'PY'
-	import webbrowser, pathlib, sys
-	p = pathlib.Path("out/cover_letter.html").resolve()
-	if not p.exists():
-		sys.exit("out/cover_letter.html not found. Run `make render-letter` first.")
-	webbrowser.open(p.as_uri())
-	print("Opened", p)
-	PY
+	@if [ ! -f out/cover_letter.html ]; then \
+		echo "out/cover_letter.html not found. Run \`make render-letter\` first."; \
+		exit 1; \
+	fi
+	xdg-open out/cover_letter.html 2>/dev/null || \
+	open out/cover_letter.html 2>/dev/null || \
+	python3 -c 'import webbrowser, pathlib, sys; p=pathlib.Path("out/cover_letter.html").resolve(); webbrowser.open(p.as_uri()); print("Opened", p)'

@@ -4,7 +4,8 @@ from pdf.render import render_cover_letter
 from pathlib import Path
 
 db = SessionLocal()
-job = db.query(Job).get(1)
+job = db.get(Job, 1)
+# job = db.query(Job).get(1)
 db.close()
 if not job:
     raise SystemExit("No job with id=1. Create one via POST /jobs/ first.")
