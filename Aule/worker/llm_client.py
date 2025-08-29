@@ -7,6 +7,7 @@ class LLMClient:
         self.provider = os.getenv("LLM_PROVIDER", "mock").lower()
         self.openai_key = os.getenv("OPENAI_API_KEY")
         self.ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        self.model = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
 
     def complete(self, prompt: str) -> str:

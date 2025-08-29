@@ -27,6 +27,8 @@ services:
     ports:
       - "8000:8000"
     user: "${USER_ID}:${GROUP_ID}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   worker:
     build: .
@@ -38,6 +40,8 @@ services:
       - redis
       - db
     user: "${USER_ID}:${GROUP_ID}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   db_data:
