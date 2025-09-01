@@ -8,7 +8,7 @@ Minimal runnable scaffold.
 
 ## Run (local)
 
-First clear any process in progress otherwise it will crash
+First clear any process in progress otherwise it will crash (`sudo systemctl stop postgresql`)
 
 1. `python -m venv .venv && source .venv/bin/activate` (or Windows equivalent)
 2. `cp .env.example .env` and adjust values if needed

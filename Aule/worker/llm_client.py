@@ -34,7 +34,7 @@ class LLMClient:
             "Content-Type": "application/json",
         }
         json = {
-            "model": "gpt-4o-mini",
+            "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.5,
         }
