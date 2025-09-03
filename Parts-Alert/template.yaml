@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Parts Alerts API (API Gateway + Lambda + DynamoDB)
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 10
+    MemorySize: 256
+    Tracing: Active
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        PARTS_TABLE: !Ref PartsTable
+        BOM_TABLE: !Ref BomTable
+
+Resources:
+  PartsApiHttp:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+        AllowMethods:
+          - GET
+          - POST
+          - PATCH
+          - PUT
+          - OPTIONS
+
+  PartsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-Parts"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: code
+          AttributeType: S
+      KeySchema:
+        - AttributeName: code
+          KeyType: HASH
+
+  BomTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-BOM"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: parent_code
+          AttributeType: S
+        - AttributeName: component_code
+          AttributeType: S
+      KeySchema:
+        - AttributeName: parent_code
+          KeyType: HASH
+        - AttributeName: component_code
+          KeyType: RANGE
+
+  PartsApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-PartsApi"
+      CodeUri: src/parts_api/
+      Handler: app.lambda_handler
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PartsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BomTable
+      Events:
+        Health:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PartsApiHttp
+            Path: /health
+            Method: GET
+        OptionsAny:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PartsApiHttp
+            Path: /{proxy+}
+            Method: OPTIONS
+
+Outputs:
+  ApiBaseUrl:
+    Description: Base URL for the HTTP API
+    Value: !Sub "https://${PartsApiHttp}.execute-api.${AWS::Region}.amazonaws.com"
+  PartsTableName:
+    Description: DynamoDB Parts table name
+    Value: !Ref PartsTable
+  BomTableName:
+    Description: DynamoDB BOM table name
+    Value: !Ref BomTable
