@@ -20,17 +20,9 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       CorsConfiguration:
-        AllowOrigins:
-          - "*"
-        AllowHeaders:
-          - Content-Type
-          - Authorization
-        AllowMethods:
-          - GET
-          - POST
-          - PATCH
-          - PUT
-          - OPTIONS
+        AllowOrigins: ["*"]
+        AllowHeaders: ["Content-Type", "Authorization"]
+        AllowMethods: ["GET", "POST", "PATCH", "PUT", "OPTIONS"]
 
   PartsTable:
     Type: AWS::DynamoDB::Table
@@ -72,19 +64,74 @@ Resources:
             TableName: !Ref PartsTable
         - DynamoDBCrudPolicy:
             TableName: !Ref BomTable
+        # Explicit permission for transactions:
+        - PolicyName: AllowDdbTransactions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:TransactWriteItems
+                Resource:
+                  - !GetAtt PartsTable.Arn
+                  - !GetAtt BomTable.Arn
       Events:
+        # Health
         Health:
           Type: HttpApi
           Properties:
             ApiId: !Ref PartsApiHttp
             Path: /health
             Method: GET
+        # CORS preflight (catch-all)
         OptionsAny:
           Type: HttpApi
           Properties:
             ApiId: !Ref PartsApiHttp
             Path: /{proxy+}
             Method: OPTIONS
+
+        # Parts endpoints
+        GetParts:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PartsApiHttp
+            Path: /parts
+            Method: GET
+        PostParts:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PartsApiHttp
+            Path: /parts
+            Method: POST
+        PatchPart:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PartsApiHttp
+            Path: /parts/{code}
+            Method: PATCH
+
+        # BOM endpoints
+        PutBom:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PartsApiHttp
+            Path: /bom/{parent_code}
+            Method: PUT
+        GetBom:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PartsApiHttp
+            Path: /bom/{parent_code}
+            Method: GET
+
+        # Build endpoint
+        PostBuild:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref PartsApiHttp
+            Path: /assemblies/{parent_code}/build
+            Method: POST
 
 Outputs:
   ApiBaseUrl:
