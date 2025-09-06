@@ -65,16 +65,13 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref BomTable
         # Explicit permission for transactions:
-        - PolicyName: AllowDdbTransactions
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - dynamodb:TransactWriteItems
-                Resource:
-                  - !GetAtt PartsTable.Arn
-                  - !GetAtt BomTable.Arn
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:TransactWriteItems
+              Resource:
+                - !GetAtt PartsTable.Arn
+                - !GetAtt BomTable.Arn
       Events:
         # Health
         Health:
@@ -83,6 +80,7 @@ Resources:
             ApiId: !Ref PartsApiHttp
             Path: /health
             Method: GET
+
         # CORS preflight (catch-all)
         OptionsAny:
           Type: HttpApi
@@ -98,12 +96,14 @@ Resources:
             ApiId: !Ref PartsApiHttp
             Path: /parts
             Method: GET
+
         PostParts:
           Type: HttpApi
           Properties:
             ApiId: !Ref PartsApiHttp
             Path: /parts
             Method: POST
+
         PatchPart:
           Type: HttpApi
           Properties:
@@ -118,6 +118,7 @@ Resources:
             ApiId: !Ref PartsApiHttp
             Path: /bom/{parent_code}
             Method: PUT
+
         GetBom:
           Type: HttpApi
           Properties:

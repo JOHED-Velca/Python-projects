@@ -18,3 +18,6 @@ Parts Alert is a Python-based application designed to monitor and notify users a
 ## Getting Started
 
 Install dependencies from `requirements.txt` and run the API from the `src/parts_api/app.py` file.
+
+API="https://1ij17r5nih.execute-api.ca-central-1.amazonaws.com"
+curl "$API/health"
