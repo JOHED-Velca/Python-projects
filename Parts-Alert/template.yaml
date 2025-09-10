@@ -52,6 +52,59 @@ Resources:
         - AttributeName: component_code
           KeyType: RANGE
 
+    # === SNS topic for emails ===
+  LowStockTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AWS::StackName}-LowStockTopic"
+
+  # === Tiny state table to avoid duplicate emails ===
+  AlertsStateTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-AlertsState"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+
+    # === Scheduled Alerts Lambda ===
+  AlertsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-Alerts"
+      CodeUri: src/alerts/
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      MemorySize: 256
+      Timeout: 10
+      Environment:
+        Variables:
+          PARTS_TABLE: !Ref PartsTable
+          ALERTS_STATE_TABLE: !Ref AlertsStateTable
+          ALERTS_TOPIC_ARN: !Ref LowStockTopic
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - DynamoDBReadPolicy:
+            TableName: !Ref PartsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AlertsStateTable
+        - Statement:
+            - Effect: Allow
+              Action: "sns:Publish"
+              Resource: !Ref LowStockTopic
+      Events:
+        Every15Minutes:
+          Type: Schedule
+          Properties:
+            Schedule: rate(15 minutes)
+            Name: !Sub "${AWS::StackName}-LowStockSchedule"
+            Description: "Check low stock and notify via SNS"
+            Enabled: true
+
   PartsApiFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -144,3 +197,9 @@ Outputs:
   BomTableName:
     Description: DynamoDB BOM table name
     Value: !Ref BomTable
+  AlertsTopicArn:
+    Description: SNS Topic ARN for low-stock alerts
+    Value: !Ref LowStockTopic
+  AlertsStateTableName:
+    Description: DynamoDB Alerts state table
+    Value: !Ref AlertsStateTable
