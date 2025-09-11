@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: Parts Alerts API (API Gateway + Lambda + DynamoDB)
 
+Parameters:
+  ApiSecret:
+    Type: String
+    Description: Shared secret for simple header auth (X-Api-Key)
+    NoEcho: true
+
 Globals:
   Function:
     Runtime: python3.12
@@ -14,6 +20,7 @@ Globals:
       Variables:
         PARTS_TABLE: !Ref PartsTable
         BOM_TABLE: !Ref BomTable
+        API_SECRET: !Ref ApiSecret
 
 Resources:
   PartsApiHttp:

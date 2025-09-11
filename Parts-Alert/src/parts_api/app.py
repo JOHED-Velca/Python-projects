@@ -5,6 +5,17 @@ from decimal import Decimal
 import boto3
 from boto3.dynamodb.conditions import Key
 
+API_SECRET = os.environ.get("API_SECRET")
+
+def _require_auth(event):
+    # Allow GETs without auth if you want; everything else must pass the header.
+    method = event.get("requestContext", {}).get("http", {}).get("method", "")
+    if method == "GET":
+        return True
+    headers = event.get("headers") or {}
+    provided = headers.get("x-api-key") or headers.get("X-Api-Key")
+    return API_SECRET and provided == API_SECRET
+
 # --- Environment & AWS clients ---
 PARTS_TABLE_NAME = os.environ["PARTS_TABLE"]
 BOM_TABLE_NAME = os.environ["BOM_TABLE"]
@@ -270,6 +281,9 @@ def lambda_handler(event, context):
             body = json.loads(event["body"])
         except Exception:
             return _resp(400, {"error": "Invalid JSON body"})
+    # Simple shared-secret auth (free)
+    if not _require_auth(event):
+        return _resp(401, {"error": "Unauthorized", "hint": "Provide X-Api-Key header"})
 
     # CORS preflight
     if method == "OPTIONS":
