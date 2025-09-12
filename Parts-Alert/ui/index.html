@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Parts Alerts – Simple UI</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --muted: #94a3b8;
+        --ok: #16a34a;
+        --warn: #ea580c;
+        --err: #ef4444;
+        --txt: #e5e7eb;
+        --btn: #1f2937;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Arial;
+        background: var(--bg);
+        color: var(--txt);
+      }
+      header {
+        padding: 16px 20px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        background: #0b1220;
+        border-bottom: 1px solid #1f2937;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+      }
+      .btn {
+        background: var(--btn);
+        color: var(--txt);
+        border: 1px solid #374151;
+        padding: 8px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+      }
+      .btn:hover {
+        filter: brightness(1.1);
+      }
+      .btn.small {
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 12px;
+      }
+      .btn.ghost {
+        background: transparent;
+      }
+      .btn.ok {
+        border-color: #14532d;
+      }
+      .btn.warn {
+        border-color: #7c2d12;
+      }
+      main {
+        padding: 16px 20px;
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 1fr;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid #1f2937;
+        border-radius: 16px;
+        padding: 16px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+      label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      input,
+      select {
+        background: #0b1220;
+        color: var(--txt);
+        border: 1px solid #303a4a;
+        border-radius: 10px;
+        padding: 8px 10px;
+      }
+      input[type="number"] {
+        width: 100px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #1f2937;
+        padding: 10px 8px;
+        text-align: left;
+        font-size: 14px;
+      }
+      th {
+        color: #cbd5e1;
+        font-weight: 600;
+      }
+      tr.low td {
+        background: rgba(234, 88, 12, 0.08);
+      }
+      .badge {
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid #374151;
+        color: #cbd5e1;
+      }
+      .badge.low {
+        border-color: #7c2d12;
+        color: #fca5a5;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .right {
+        text-align: right;
+      }
+      .error {
+        color: var(--err);
+      }
+      .success {
+        color: var(--ok);
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 900px) {
+        .grid2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .spacer {
+        height: 6px;
+      }
+      .hint {
+        font-size: 12px;
+        color: #93a1b6;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Parts Alerts – Dashboard</h1>
+      <div class="row">
+        <button class="btn small" onclick="openSettings()">Settings</button>
+        <button class="btn small" onclick="refreshParts()">Refresh</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Settings -->
+      <section class="card" id="settingsCard" style="display: none">
+        <div class="row" style="justify-content: space-between">
+          <strong>Settings</strong>
+          <button class="btn small" onclick="closeSettings()">Close</button>
+        </div>
+        <div class="spacer"></div>
+        <div class="grid2">
+          <div>
+            <label>API Base URL</label><br />
+            <input
+              id="apiUrl"
+              placeholder="https://xxxx.execute-api.ca-central-1.amazonaws.com"
+              style="width: 100%"
+            />
+            <div class="hint">
+              Find it with:
+              <code>aws cloudformation describe-stacks ... ApiBaseUrl</code>
+            </div>
+          </div>
+          <div>
+            <label>X-Api-Key (for writes)</label><br />
+            <input
+              id="apiKey"
+              placeholder="SuperSecret_123"
+              style="width: 100%"
+            />
+            <div class="hint">
+              Required for POST/PATCH/BUILD. GETs may be open.
+            </div>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn ok" onclick="saveSettings()">Save</button>
+        <span id="settingsMsg" class="hint"></span>
+      </section>
+
+      <!-- Actions -->
+      <section class="card">
+        <div class="row" style="justify-content: space-between">
+          <div class="row" style="gap: 12px">
+            <label
+              ><input type="checkbox" id="onlyLow" onchange="refreshParts()" />
+              Show only low stock</label
+            >
+            <span id="status" class="hint"></span>
+          </div>
+          <div class="row" style="gap: 8px">
+            <button class="btn small" onclick="refreshParts()">Reload</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Parts Table -->
+      <section class="card">
+        <div class="row" style="justify-content: space-between">
+          <strong>Parts</strong>
+          <div class="row">
+            <button class="btn small" onclick="openNewPart()">Add Part</button>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <table id="partsTable">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th class="right">Qty</th>
+              <th class="right">Min</th>
+              <th>Status</th>
+              <th class="right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="partsBody"></tbody>
+        </table>
+        <div id="partsEmpty" class="hint" style="display: none">
+          No parts yet.
+        </div>
+        <div id="error" class="error"></div>
+      </section>
+
+      <!-- Build assembly -->
+      <section class="card">
+        <strong>Build Assembly</strong>
+        <div class="spacer"></div>
+        <div class="row" style="gap: 12px; flex-wrap: wrap">
+          <input id="buildParent" placeholder="PANEL-001" />
+          <input id="buildQty" type="number" min="1" value="1" />
+          <button class="btn ok" onclick="buildAssembly()">Build</button>
+          <span id="buildMsg" class="hint"></span>
+        </div>
+      </section>
+
+      <!-- New Part Modal-ish -->
+      <section class="card" id="newPartCard" style="display: none">
+        <div class="row" style="justify-content: space-between">
+          <strong>New Part</strong>
+          <button class="btn small" onclick="closeNewPart()">Close</button>
+        </div>
+        <div class="spacer"></div>
+        <div class="grid2">
+          <div>
+            <label>Code</label><br /><input
+              id="npCode"
+              placeholder="SCREW-10MM"
+              style="width: 100%"
+            />
+          </div>
+          <div>
+            <label>Name</label><br /><input
+              id="npName"
+              placeholder="Screw 10mm"
+              style="width: 100%"
+            />
+          </div>
+          <div>
+            <label>Quantity</label><br /><input
+              id="npQty"
+              type="number"
+              value="0"
+            />
+          </div>
+          <div>
+            <label>Min Quantity</label><br /><input
+              id="npMin"
+              type="number"
+              value="0"
+            />
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn ok" onclick="createPart()">Create</button>
+        <span id="npMsg" class="hint"></span>
+      </section>
+    </main>
+
+    <script>
+      // --- Settings persistence ---
+      function getCfg() {
+        return {
+          api: localStorage.getItem("api") || "",
+          key: localStorage.getItem("key") || "",
+        };
+      }
+      function saveCfg(api, key) {
+        localStorage.setItem("api", api.trim());
+        localStorage.setItem("key", key.trim());
+      }
+      function openSettings() {
+        const { api, key } = getCfg();
+        document.getElementById("apiUrl").value = api;
+        document.getElementById("apiKey").value = key;
+        document.getElementById("settingsCard").style.display = "";
+      }
+      function closeSettings() {
+        document.getElementById("settingsCard").style.display = "none";
+      }
+      function saveSettings() {
+        const api = document.getElementById("apiUrl").value.trim();
+        const key = document.getElementById("apiKey").value.trim();
+        saveCfg(api, key);
+        document.getElementById("settingsMsg").textContent = "Saved ✓";
+        setTimeout(
+          () => (document.getElementById("settingsMsg").textContent = ""),
+          1200
+        );
+        closeSettings();
+        refreshParts();
+      }
+      // --- Helpers ---
+      function headers(write = false) {
+        const h = { "Content-Type": "application/json" };
+        if (write) {
+          const { key } = getCfg();
+          if (key) h["X-Api-Key"] = key;
+        }
+        return h;
+      }
+      function apiBase() {
+        const { api } = getCfg();
+        if (!api) throw new Error("Set API Base URL in Settings");
+        return api.replace(/\/+$/, "");
+      }
+      function setStatus(msg, ok = true) {
+        const el = document.getElementById("status");
+        el.textContent = msg || "";
+        el.style.color = ok ? "#93c5fd" : "#ef4444";
+      }
+      function setError(msg) {
+        const el = document.getElementById("error");
+        el.textContent = msg || "";
+      }
+      function fmtBool(b) {
+        return b ? "LOW" : "OK";
+      }
+
+      // --- Data ops ---
+      async function fetchParts() {
+        setError("");
+        const onlyLow = document.getElementById("onlyLow").checked;
+        const url = apiBase() + "/parts" + (onlyLow ? "?below_min=true" : "");
+        const res = await fetch(url, { headers: headers(false) });
+        if (!res.ok) throw new Error("GET /parts failed: " + res.status);
+        return res.json();
+      }
+      async function patchPart(code, payload) {
+        const res = await fetch(
+          apiBase() + "/parts/" + encodeURIComponent(code),
+          {
+            method: "PATCH",
+            headers: headers(true),
+            body: JSON.stringify(payload),
+          }
+        );
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error("PATCH failed: " + res.status + " " + txt);
+        }
+        return res.json();
+      }
+      async function postPart(item) {
+        const res = await fetch(apiBase() + "/parts", {
+          method: "POST",
+          headers: headers(true),
+          body: JSON.stringify(item),
+        });
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error("POST /parts failed: " + res.status + " " + txt);
+        }
+        return res.json();
+      }
+      async function postBuild(parent, qty) {
+        const res = await fetch(
+          apiBase() + "/assemblies/" + encodeURIComponent(parent) + "/build",
+          {
+            method: "POST",
+            headers: headers(true),
+            body: JSON.stringify({ quantity: qty }),
+          }
+        );
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error("POST build failed: " + res.status + " " + txt);
+        }
+        return res.json();
+      }
+
+      // --- UI wiring ---
+      async function refreshParts() {
+        try {
+          setStatus("Loading…");
+          const items = await fetchParts();
+          renderParts(items);
+          setStatus("Loaded " + items.length + " item(s).");
+        } catch (e) {
+          console.error(e);
+          setError(e.message);
+          setStatus("Load failed", false);
+        }
+      }
+
+      function renderParts(items) {
+        const body = document.getElementById("partsBody");
+        body.innerHTML = "";
+        document.getElementById("partsEmpty").style.display = items.length
+          ? "none"
+          : "";
+        for (const it of items) {
+          const tr = document.createElement("tr");
+          tr.className = it.below_min ? "low" : "";
+          tr.innerHTML = `
+        <td><code>${escapeHtml(it.code || "")}</code></td>
+        <td>${escapeHtml(it.name || "")}</td>
+        <td class="right">
+          <div class="row" style="justify-content:flex-end; gap:6px;">
+            <button class="btn small" title="-1" onclick="adjQty('${js(
+              it.code
+            )}', -1)">−</button>
+            <span>${it.quantity ?? 0}</span>
+            <button class="btn small" title="+1" onclick="adjQty('${js(
+              it.code
+            )}', 1)">+</button>
+          </div>
+        </td>
+        <td class="right">
+          <div class="row" style="justify-content:flex-end; gap:6px;">
+            <input type="number" id="min_${css(it.code)}" value="${
+            it.min_quantity ?? 0
+          }" style="width:90px;">
+            <button class="btn small" onclick="setMin('${js(
+              it.code
+            )}')">Save</button>
+          </div>
+        </td>
+        <td><span class="badge ${it.below_min ? "low" : ""}">${fmtBool(
+            it.below_min
+          )}</span></td>
+        <td class="right">
+          <div class="row" style="justify-content:flex-end; gap:6px;">
+            <input type="number" id="set_${css(
+              it.code
+            )}" placeholder="set qty" style="width:110px;">
+            <button class="btn small" onclick="setQty('${js(
+              it.code
+            )}')">Set</button>
+          </div>
+        </td>
+      `;
+          body.appendChild(tr);
+        }
+      }
+
+      async function adjQty(code, delta) {
+        try {
+          await patchPart(code, { quantity_delta: delta });
+          refreshParts();
+        } catch (e) {
+          setError(e.message);
+        }
+      }
+      async function setQty(code) {
+        const el = document.getElementById("set_" + css(code));
+        const v = parseInt(el.value || "0", 10);
+        if (Number.isNaN(v)) return;
+        try {
+          await patchPart(code, { quantity: v });
+          el.value = "";
+          refreshParts();
+        } catch (e) {
+          setError(e.message);
+        }
+      }
+      async function setMin(code) {
+        const el = document.getElementById("min_" + css(code));
+        const v = parseInt(el.value || "0", 10);
+        if (Number.isNaN(v)) return;
+        try {
+          await patchPart(code, { min_quantity: v });
+          refreshParts();
+        } catch (e) {
+          setError(e.message);
+        }
+      }
+
+      function openNewPart() {
+        document.getElementById("newPartCard").style.display = "";
+        document.getElementById("npMsg").textContent = "";
+      }
+      function closeNewPart() {
+        document.getElementById("newPartCard").style.display = "none";
+      }
+      async function createPart() {
+        const code = document.getElementById("npCode").value.trim();
+        const name = document.getElementById("npName").value.trim();
+        const qty = parseInt(document.getElementById("npQty").value || "0", 10);
+        const minq = parseInt(
+          document.getElementById("npMin").value || "0",
+          10
+        );
+        if (!code || !name) {
+          document.getElementById("npMsg").textContent =
+            "Code and Name required";
+          return;
+        }
+        try {
+          await postPart({ code, name, quantity: qty, min_quantity: minq });
+          document.getElementById("npMsg").textContent = "Created ✓";
+          setTimeout(() => {
+            closeNewPart();
+            refreshParts();
+          }, 600);
+        } catch (e) {
+          document.getElementById("npMsg").textContent = e.message;
+        }
+      }
+
+      async function buildAssembly() {
+        const parent = document.getElementById("buildParent").value.trim();
+        const qty = parseInt(
+          document.getElementById("buildQty").value || "0",
+          10
+        );
+        if (!parent || !qty || qty <= 0) {
+          document.getElementById("buildMsg").textContent =
+            "Enter parent code and positive quantity";
+          return;
+        }
+        try {
+          await postBuild(parent, qty);
+          document.getElementById("buildMsg").textContent = "Build OK ✓";
+          setTimeout(() => {
+            document.getElementById("buildMsg").textContent = "";
+          }, 1200);
+          refreshParts();
+        } catch (e) {
+          document.getElementById("buildMsg").textContent = e.message;
+        }
+      }
+
+      // --- Escaping helpers for safe HTML/attributes ---
+      function escapeHtml(s) {
+        return String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            }[c])
+        );
+      }
+      function js(s) {
+        return String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+      }
+      function css(s) {
+        return String(s).replace(/[^a-zA-Z0-9_-]/g, "_");
+      }
+
+      // auto-init
+      (function init() {
+        const { api } = getCfg();
+        if (!api) openSettings();
+        refreshParts().catch((e) => setError(e.message));
+      })();
+    </script>
+  </body>
+</html>
