@@ -273,6 +273,15 @@ def handle_build(parent_code, body):
 def lambda_handler(event, context):
     method = event.get("requestContext", {}).get("http", {}).get("method", "")
     path = event.get("rawPath", "")
+    
+    # CORS preflight
+    if method == "OPTIONS":
+        return _resp(200, {"ok": True})
+    
+     # Simple shared-secret auth (free)
+    if not _require_auth(event):
+        return _resp(401, {"error": "Unauthorized", "hint": "Provide X-Api-Key header"})
+
     query = event.get("queryStringParameters") or {}
     path_params = event.get("pathParameters") or {}
     body = {}
@@ -281,14 +290,7 @@ def lambda_handler(event, context):
             body = json.loads(event["body"])
         except Exception:
             return _resp(400, {"error": "Invalid JSON body"})
-    # Simple shared-secret auth (free)
-    if not _require_auth(event):
-        return _resp(401, {"error": "Unauthorized", "hint": "Provide X-Api-Key header"})
-
-    # CORS preflight
-    if method == "OPTIONS":
-        return _resp(200, {"ok": True})
-
+    
     # Health
     if method == "GET" and path == "/health":
         return _resp(200, {
