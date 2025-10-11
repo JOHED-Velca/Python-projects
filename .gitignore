@@ -1,0 +1,144 @@
+# ─────────────────────────────
+# PYTHON
+# ─────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.conda/
+.venv.bak/
+*.env
+*.env.*
+
+# Byte-compiled / optimized / DLL files
+*.pyo
+*.pyd
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.xml
+*.cover
+.pytest_cache/
+.cache/
+.pyre/
+.mypy_cache/
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+*.ipynb~
+*.nbconvert.ipynb
+
+# Logs and debugging
+*.log
+logs/
+*.out
+*.err
+
+# ─────────────────────────────
+# LANGCHAIN / OPENAI / AI AGENT
+# ─────────────────────────────
+# Cache and run history
+.langchain/
+.vectorstore/
+.chroma/
+.db/
+*.sqlite
+*.pkl
+*.sav
+*.joblib
+*.jsonl
+outputs/
+tmp/
+artifacts/
+.checkpoints/
+
+# Secrets / configs
+openai_api_key.txt
+config.yaml
+config.yml
+secrets.json
+credentials.json
+
+# ─────────────────────────────
+# DATA
+# ─────────────────────────────
+data/
+datasets/
+downloads/
+*.csv
+*.tsv
+*.xls
+*.xlsx
+*.parquet
+
+# ─────────────────────────────
+# DOCKER / DEPLOYMENT
+# ─────────────────────────────
+# Docker
+Dockerfile~
+*.dockerfile~
+docker-compose*.yml
+.docker/
+.dockerignore
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+.eggs/
+*.manifest
+*.spec
+
+# ─────────────────────────────
+# IDE / EDITOR
+# ─────────────────────────────
+# VS Code
+.vscode/
+.history/
+
+# PyCharm / JetBrains
+.idea/
+
+# macOS / Linux / Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─────────────────────────────
+# ENVIRONMENT VARIABLES
+# ─────────────────────────────
+.env
+.env.local
+.env.test
+.env.production
+.envrc
+.env.bak
+
+# ─────────────────────────────
+# OTHER OPTIONALS
+# ─────────────────────────────
+# Notebooks exports
+*.html
+*.pdf
+*.md
+
+# LLM fine-tuning artifacts
+checkpoints/
+runs/
+wandb/
+mlruns/
+
+# Node (if you later add a frontend or dashboard)
+node_modules/
+package-lock.json
+yarn.lock
+
