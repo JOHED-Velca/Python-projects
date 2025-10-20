@@ -129,7 +129,6 @@ desktop.ini
 # Notebooks exports
 *.html
 *.pdf
-*.md
 
 # LLM fine-tuning artifacts
 checkpoints/
